@@ -1,4 +1,4 @@
-package com.santander.springcepapi.spring_cep_acl;
+package com.santander.springcepapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SpringCepAclApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringCepAclApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SpringCepAclApplication.class, args);
+    }
 
 }

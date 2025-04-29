@@ -1,4 +1,4 @@
-package com.santander.springcepapi.spring_cep_acl;
+package com.santander.springcepapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

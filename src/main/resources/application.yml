@@ -1,0 +1,24 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: cep-acl
+
+api:
+  viacep:
+    timeout-seconds: 5
+
+aws:
+  region: ${AWS_REGION:sa-east-1}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  devtools.restart.additional-exclude: software.amazon.awssdk.**
+
+aws:
+  endpoint: http://localhost:4566
