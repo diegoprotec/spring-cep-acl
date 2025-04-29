@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: cep-acl
+  devtools.restart.additional-exclude: "software.amazon.awssdk.**"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  show-actuator: true
 
 api:
   viacep:
@@ -17,8 +26,6 @@ spring:
   config:
     activate:
       on-profile: local
-
-  devtools.restart.additional-exclude: software.amazon.awssdk.**
 
 aws:
   endpoint: http://localhost:4566
