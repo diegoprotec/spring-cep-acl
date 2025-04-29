@@ -22,6 +22,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // AWS
+    implementation platform('software.amazon.awssdk:bom:2.25.1')
+
     // Jakart
     implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
 
@@ -38,8 +41,7 @@ dependencies {
 
     // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.17.0'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'software.amazon.awssdk:apache-client'
 
     //Geral
     implementation 'org.glassfish.jersey.core:jersey-common:3.1.10'
@@ -49,7 +51,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    systemProperty 'spring.profiles.active', 'dev'
+    systemProperty 'spring.profiles.active', 'local'
 
     testLogging {
         events "passed", "skipped", "failed"
