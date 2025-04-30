@@ -30,8 +30,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Compilação
-        env:
-          SPRING_PROFILES_ACTIVE: local
         run: ./gradlew build
 
       - name: Prepara artefato de deploy
