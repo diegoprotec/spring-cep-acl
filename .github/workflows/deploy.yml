@@ -32,7 +32,7 @@ jobs:
       - name: Compilação
         env:
           SPRING_PROFILES_ACTIVE: dev
-        run: ./gradlew build
+        run: ./gradlew clean build
 
       - name: Prepara artefato de deploy
         run: |
