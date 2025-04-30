@@ -7,12 +7,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.boot.test.context.SpringBootTest;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.DescribeTableEnhancedResponse;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
 import software.amazon.awssdk.services.dynamodb.model.TableDescription;
 import software.amazon.awssdk.services.dynamodb.model.TableStatus;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -20,10 +24,14 @@ import static org.mockito.Mockito.when;
 public class SpringCepAclApplicationTest {
 
     @Mock
+    DynamoDbEnhancedClient dynamoDbEnhancedClient;
+
+    @Mock
     DynamoDbTable<Cep> mockTable;
 
     @BeforeEach
     void setup() {
+        when(dynamoDbEnhancedClient.table(eq(Cep.CEP_TABLE_NAME), any(TableSchema.class))).thenReturn(mockTable);
         when(mockTable.describeTable()).thenReturn(DescribeTableEnhancedResponse.builder()
                 .response(DescribeTableResponse.builder()
                         .table(TableDescription.builder()

@@ -55,7 +55,7 @@ test {
     useJUnitPlatform()
     jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}", '-Xshare:off'
 
-    systemProperty 'spring.profiles.active', 'local'
+    systemProperty 'spring.profiles.active', 'dev'
 
     testLogging {
         events "passed", "skipped", "failed"
