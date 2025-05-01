@@ -21,7 +21,6 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 
     // AWS
     implementation platform('software.amazon.awssdk:bom:2.25.1')
@@ -46,6 +45,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-inline:5.2.0'
 
     //Geral
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
     implementation 'org.glassfish.jersey.core:jersey-common:3.1.10'
     implementation 'io.projectreactor.netty:reactor-netty:1.3.0-M2'
 
@@ -54,8 +54,6 @@ dependencies {
 test {
     useJUnitPlatform()
     jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}", '-Xshare:off'
-
-    systemProperty 'spring.profiles.active', 'dev'
 
     testLogging {
         events "passed", "skipped", "failed"

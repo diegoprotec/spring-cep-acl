@@ -26,24 +26,18 @@ public class DynamoDBConfig {
     private static final Logger LOG = LoggerFactory.getLogger(DynamoDBConfig.class);
 
     @Configuration
-    @Profile("local")
-    public static class LocalDynamoDBConfig {
+    @Profile("!dev")
+    public static class DynamoDBRemoteConfig {
 
-        @Value("${aws.region:sa-east-1}")
+        @Value("${aws.region}")
         private String region;
-
-        @Value("${aws.endpoint}")
-        private String endpoint;
 
         @Bean
         public DynamoDbClient dynamoDbClient() {
-            LOG.info("Configurando DynamoDbClient url: {}", endpoint);
+            LOG.info("REMOTO: Configurando DynamoDbClient");
             return DynamoDbClient.builder()
-                    .endpointOverride(URI.create(endpoint))
                     .region(Region.of(region))
-                    .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create("test-key", "test-secret")
-                    ))
+                    .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
         }
 
@@ -57,17 +51,30 @@ public class DynamoDBConfig {
     }
 
     @Configuration
-    @Profile("!local")
-    public static class DynamoDBRemoteConfig {
+    @Profile("dev")
+    public static class LocalDynamoDBConfig {
 
         @Value("${aws.region:sa-east-1}")
         private String region;
 
+        @Value("${aws.endpoint:uri}")
+        private String endpoint;
+
+        @Value("${aws.accessKeyId:test}")
+        private String accessKeyId;
+
+        @Value("${aws.secretKey:test}")
+        private String secretKey;
+
         @Bean
         public DynamoDbClient dynamoDbClient() {
+            LOG.info("LOCAL: Configurando DynamoDbClient url: {}", endpoint);
             return DynamoDbClient.builder()
+                    .endpointOverride(URI.create(endpoint))
                     .region(Region.of(region))
-                    .credentialsProvider(DefaultCredentialsProvider.create())
+                    .credentialsProvider(StaticCredentialsProvider.create(
+                            AwsBasicCredentials.create(accessKeyId, secretKey)
+                    ))
                     .build();
         }
 
@@ -90,6 +97,7 @@ public class DynamoDBConfig {
 
                 DynamoDbTable<Cep> cepTable = enhancedClient.table(Cep.CEP_TABLE_NAME,
                         TableSchema.fromBean(Cep.class));
+
                 try {
                     LOG.info("Verificando existência da tabela {}", Cep.CEP_TABLE_NAME);
                     cepTable.describeTable();
@@ -101,6 +109,7 @@ public class DynamoDBConfig {
                                     .build()));
                     LOG.info("Tabela criada com sucesso!");
                 }
+
             } catch (Exception e) {
                 LOG.error("Erro ao criar tabela {}: {}", Cep.CEP_TABLE_NAME, e.getMessage(), e);
                 LOG.error("Detalhes completos do erro:", e);

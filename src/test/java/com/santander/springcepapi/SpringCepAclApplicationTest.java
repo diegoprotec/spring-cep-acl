@@ -1,7 +1,6 @@
 package com.santander.springcepapi;
 
 import com.santander.springcepapi.boundary.cep.domain.Cep;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -16,7 +15,8 @@ import software.amazon.awssdk.services.dynamodb.model.TableDescription;
 import software.amazon.awssdk.services.dynamodb.model.TableStatus;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -24,14 +24,14 @@ import static org.mockito.Mockito.when;
 public class SpringCepAclApplicationTest {
 
     @Mock
-    DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
     @Mock
-    DynamoDbTable<Cep> mockTable;
+    private DynamoDbTable<Cep> mockTable;
 
-    @BeforeEach
-    void setup() {
-        when(dynamoDbEnhancedClient.table(eq(Cep.CEP_TABLE_NAME), any(TableSchema.class))).thenReturn(mockTable);
+    @Test
+    void contextLoads() {
+        doReturn(mockTable).when(dynamoDbEnhancedClient).table(anyString(), any(TableSchema.class));
         when(mockTable.describeTable()).thenReturn(DescribeTableEnhancedResponse.builder()
                 .response(DescribeTableResponse.builder()
                         .table(TableDescription.builder()
@@ -40,10 +40,6 @@ public class SpringCepAclApplicationTest {
                                 .build())
                         .build())
                 .build());
-    }
-
-    @Test
-    void contextLoads() {
     }
 
 }
