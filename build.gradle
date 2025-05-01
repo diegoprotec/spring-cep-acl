@@ -117,6 +117,10 @@ jacocoTestCoverageVerification {
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-Xlint:unchecked"]
+}
+
 tasks.register('checkCoverage') {
     dependsOn test
     dependsOn jacocoTestReport

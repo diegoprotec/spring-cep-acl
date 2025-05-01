@@ -14,8 +14,6 @@ import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
 import software.amazon.awssdk.services.dynamodb.model.TableDescription;
 import software.amazon.awssdk.services.dynamodb.model.TableStatus;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +29,8 @@ public class SpringCepAclApplicationTest {
 
     @Test
     void contextLoads() {
-        doReturn(mockTable).when(dynamoDbEnhancedClient).table(anyString(), any(TableSchema.class));
+        TableSchema<Cep> tableSchema = TableSchema.fromBean(Cep.class);
+        doReturn(mockTable).when(dynamoDbEnhancedClient).table(Cep.CEP_TABLE_NAME, tableSchema);
         when(mockTable.describeTable()).thenReturn(DescribeTableEnhancedResponse.builder()
                 .response(DescribeTableResponse.builder()
                         .table(TableDescription.builder()
