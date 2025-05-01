@@ -1,31 +1,22 @@
-server:
-  port: 8081
-
 spring:
+  profiles:
+    default: prod
+
   application:
     name: cep-acl
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-  show-actuator: true
+server:
+  port: 8081
+
+aws:
+  region: ${AWS_REGION:sa-east-1}
 
 api:
   viacep:
     timeout-seconds: 5
 
-aws:
-  region: ${AWS_REGION:sa-east-1}
-
----
-spring:
-  profiles:
-    active: dev
-
-aws:
-  endpoint: http://localhost:4566
-  accessKeyId: dummy
-  secretKey: dummy
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

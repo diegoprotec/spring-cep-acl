@@ -26,9 +26,8 @@ public class DynamoDBConfig {
     private static final Logger LOG = LoggerFactory.getLogger(DynamoDBConfig.class);
 
     @Configuration
-    @Profile("!dev")
+    @Profile("prod")
     public static class DynamoDBRemoteConfig {
-
         @Value("${aws.region}")
         private String region;
 
@@ -40,20 +39,11 @@ public class DynamoDBConfig {
                     .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
         }
-
-        @Bean
-        public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
-            return DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(dynamoDbClient)
-                    .build();
-        }
-
     }
 
     @Configuration
-    @Profile("dev")
+    @Profile("!prod")
     public static class LocalDynamoDBConfig {
-
         @Value("${aws.region:sa-east-1}")
         private String region;
 
@@ -78,44 +68,42 @@ public class DynamoDBConfig {
                     .build();
         }
 
-        @Bean
-        public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
-            return DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(dynamoDbClient)
-                    .build();
-        }
+    }
 
+    @Bean
+    public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
+        return DynamoDbEnhancedClient.builder()
+                .dynamoDbClient(dynamoDbClient)
+                .build();
     }
 
     @Bean
     public CommandLineRunner initializeDynamoDB(DynamoDbEnhancedClient enhancedClient) {
+        var tableName = Cep.CEP_TABLE_NAME;
         return args -> {
             try {
-                LOG.info("Cep class loader: {}", Cep.class.getClassLoader());
-                LOG.info("TableSchema class loader: {}", TableSchema.class.getClassLoader());
-                LOG.info("Current class loader: {}", this.getClass().getClassLoader());
-
-                DynamoDbTable<Cep> cepTable = enhancedClient.table(Cep.CEP_TABLE_NAME,
+                DynamoDbTable<Cep> cepTable = enhancedClient.table(tableName,
                         TableSchema.fromBean(Cep.class));
 
+                LOG.info("Verificando existência da tabela {}", tableName);
                 try {
-                    LOG.info("Verificando existência da tabela {}", Cep.CEP_TABLE_NAME);
-                    cepTable.describeTable();
+                    var describeTableResponse = cepTable.describeTable();
+                    var tableDescription = describeTableResponse.table();
+                    LOG.info("Tabela {} já existe. Status: {}", tableName, tableDescription.tableStatus());
                 } catch (ResourceNotFoundException e) {
+                    LOG.info("Tabela não encontrada");
                     cepTable.createTable(builder -> builder
                             .provisionedThroughput(b -> b
                                     .readCapacityUnits(5L)
                                     .writeCapacityUnits(5L)
                                     .build()));
                     LOG.info("Tabela criada com sucesso!");
+                    LOG.info("Status: {}", cepTable.describeTable().table().tableStatus());
                 }
-
             } catch (Exception e) {
-                LOG.error("Erro ao criar tabela {}: {}", Cep.CEP_TABLE_NAME, e.getMessage(), e);
-                LOG.error("Detalhes completos do erro:", e);
-                throw e;
+                LOG.error("Erro na inicialização do DynamoDB: {}", e.getMessage());
+                throw new RuntimeException("Falha na inicialização do DynamoDB", e.getCause());
             }
-            LOG.info("Confirmada com sucesso!");
         };
 
     }
