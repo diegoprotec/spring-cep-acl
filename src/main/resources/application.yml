@@ -22,9 +22,8 @@ aws:
 
 ---
 spring:
-  config:
-    activate:
-      on-profile: dev
+  profiles:
+    active: dev
 
 aws:
   endpoint: http://localhost:4566
