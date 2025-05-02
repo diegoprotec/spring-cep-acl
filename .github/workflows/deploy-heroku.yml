@@ -1,0 +1,31 @@
+# Deploy to Heroku
+name: Deploy Heroku
+
+on:
+  workflow_run:
+    workflows: [ "Build" ]
+    types:
+      - completed
+
+jobs:
+  deploy-heroku:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'heroku' }}
+
+    steps:
+      - name: Download do artefato
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy
+
+      - name: Verifica artefato baixado
+        run: tree ${{ ARTIFACT_FILE }}/
+
+      - name: Deployment status
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "🚀 Deploy successful!"
+          else
+            echo "❌ Deploy failed!"
+            exit 1
+          fi

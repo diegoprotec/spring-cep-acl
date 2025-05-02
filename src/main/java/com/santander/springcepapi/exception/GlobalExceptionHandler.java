@@ -21,37 +21,40 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(ex, request));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ExceptionResponse.notFound(ex, request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionResponse> handleInvalidInputException(MethodArgumentNotValidException ex, WebRequest request) {
+    public ResponseEntity<ExceptionResponse> handleInvalidInputException(
+            MethodArgumentNotValidException ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(ex, request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.badRequest(ex, request));
     }
 
     @ExceptionHandler(ConstraintException.class)
     public ResponseEntity<ExceptionResponse> handleInvalidInputException(ConstraintException ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(ex, request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ExceptionResponse.constraintViolation(ex, request));
     }
 
     @ExceptionHandler(NegocioException.class)
     public ResponseEntity<ExceptionResponse> handleNegocioException(NegocioException ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ExceptionResponse(ex, request));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ExceptionResponse.businessError(ex, request));
     }
 
     @ExceptionHandler(InternalServerErrorException.class)
-    public ResponseEntity<ExceptionResponse> handleInternalServerErrorException(InternalServerErrorException ex, WebRequest request) {
+    public ResponseEntity<ExceptionResponse> handleInternalServerErrorException(
+            InternalServerErrorException ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse(ex, request));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ExceptionResponse.internalError(ex, request));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleException(Exception ex, WebRequest request) {
         LOG.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse(new InternalServerErrorException("Error inesperado"), request));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ExceptionResponse.internalError(
+                new InternalServerErrorException("Error inesperado"), request));
     }
 
 }

@@ -24,7 +24,9 @@ public record CepVo(
             String bairro,
             String localidade,
             String estado) {
-        if (cep == null) throw new IllegalArgumentException("O campo 'cep' é obrigatório");
+        if (cep == null) {
+            throw new IllegalArgumentException("O campo 'cep' é obrigatório");
+        }
         this.cep = cep.replaceAll("[^0-9]", "");
         this.logradouro = logradouro;
         this.bairro = bairro;

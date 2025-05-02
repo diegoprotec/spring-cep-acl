@@ -36,7 +36,6 @@ public class CepApp implements CepApplication {
     private final CepRepository cepRepository;
     private final CepClient cepClient;
 
-
     @Autowired
     public CepApp(CepRepository cepRepository, Validator validator, CepClient cepClient) {
         this.cepRepository = cepRepository;
@@ -47,7 +46,9 @@ public class CepApp implements CepApplication {
     @Override
     public List<CepVo> buscarTodos() {
         List<Cep> lista = cepRepository.findAll();
-        if (lista.isEmpty()) return List.of();
+        if (lista.isEmpty()) {
+            return List.of();
+        }
 
         return lista.stream()
                 .map(CepMapper.INSTANCE::toVo)
@@ -66,7 +67,9 @@ public class CepApp implements CepApplication {
             String cep) {
 
         Set<ConstraintViolation<String>> violations = validator.validate(cep);
-        if (!violations.isEmpty()) throw new ConstraintException(violations);
+        if (!violations.isEmpty()) {
+            throw new ConstraintException(violations);
+        }
 
         try {
             Cep cepDocument = cepRepository.get(cep);
@@ -87,8 +90,9 @@ public class CepApp implements CepApplication {
         } catch (WebClientResponseException e) {
             throw new InternalServerErrorException(ERRO_VIACEP);
         } catch (Exception ex) {
-            if (ex.getCause() instanceof ValueInstantiationException)
+            if (ex.getCause() instanceof ValueInstantiationException) {
                 throw new NotFoundException(ERRO_CEP_NAO_ENCONTRADO + cep);
+            }
             throw new InternalServerErrorException(ex.getMessage());
         }
     }

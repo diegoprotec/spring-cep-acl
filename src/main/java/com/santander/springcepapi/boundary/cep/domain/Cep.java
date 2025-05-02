@@ -16,7 +16,8 @@ public class Cep {
     public static final String CEP_LOCALIDADE_COL = "localidade";
     public static final String CEP_ESTADO_COL = "estado";
 
-    public Cep () {}
+    public Cep() {
+    }
 
     private String cep;
     private String logradouro;
@@ -71,9 +72,13 @@ public class Cep {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Cep cepObj)) return false;
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof Cep cepObj)) {
+            return false;
+        }
         return Objects.equals(getCep(), cepObj.getCep());
     }
 
@@ -84,13 +89,13 @@ public class Cep {
 
     @Override
     public String toString() {
-        return "Cep{" +
-                "cep='" + cep + '\'' +
-                ", logradouro='" + logradouro + '\'' +
-                ", bairro='" + bairro + '\'' +
-                ", localidade='" + localidade + '\'' +
-                ", estado='" + estado + '\'' +
-                '}';
+        return "Cep{"
+                + String.format("cep='%s', ", cep)
+                + String.format("logradouro='%s', ", logradouro)
+                + String.format("bairro='%s', ", bairro)
+                + String.format("localidade='%s', ", localidade)
+                + String.format("estado='%s'", estado)
+                + '}';
     }
 
 

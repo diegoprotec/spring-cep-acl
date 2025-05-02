@@ -15,102 +15,96 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class ExceptionResponse {
+public record ExceptionResponse(
+        int status,
+        String timestamp,
+        String titulo,
+        String descricao,
+        String path,
+        List<Map<String, String>> errors
+) {
+    private static final String INVALID_CALL_TITLE = "Chamada inválida";
+    private static final String INVALID_DATA_MESSAGE = "Error nos dados fornecidos para o recurso";
+    private static final String ERROR_FIELD = "error";
 
-    private final int status;
-    private final String timestamp;
-    private final String titulo;
-    private final String descricao;
-    private final String path;
-    private final List<Map<String, String>> errors = new ArrayList<>();
-
-    public ExceptionResponse(NotFoundException e, WebRequest request) {
-        this.status = HttpStatus.NOT_FOUND.value();
-        this.timestamp = Evento.getFormattedTimestamp();
-        this.titulo = "Recurso não encontrado";
-        this.descricao = e.getMessage();
-        this.path = request.getDescription(false);
-    }
-
-    public ExceptionResponse(MethodArgumentNotValidException ex, WebRequest request) {
-        processarViolacoes(ex.getBindingResult().getAllErrors());
-        this.status = HttpStatus.BAD_REQUEST.value();
-        this.timestamp = Evento.getFormattedTimestamp();
-        this.titulo = "Chamada inválida";
-        this.descricao = "Error nos dados fornecidos para o recurso";
-        this.path = request.getDescription(false);
-    }
-
-    public ExceptionResponse(InternalServerErrorException e, WebRequest request) {
-        this.status = HttpStatus.INTERNAL_SERVER_ERROR.value();
-        this.timestamp = Evento.getFormattedTimestamp();
-        this.titulo = "Error de aplicação";
-        this.descricao = e.getMessage();
-        this.path = request.getDescription(false);
-    }
-
-    public ExceptionResponse(ConstraintException ex, WebRequest request) {
-        processarViolacoes(ex.getViolations());
-        this.status = HttpStatus.BAD_REQUEST.value();
-        this.timestamp = Evento.getFormattedTimestamp();
-        this.titulo = "Chamada inválida";
-        this.descricao = "Error nos dados fornecidos para o recurso";
-        this.path = request.getDescription(false);
-    }
-
-    public ExceptionResponse(NegocioException e, WebRequest request) {
-        this.status = HttpStatus.UNPROCESSABLE_ENTITY.value();
-        this.timestamp = Evento.getFormattedTimestamp();
-        this.titulo = "Negócio";
-        this.descricao = e.getMessage();
-        this.path = request.getDescription(false);
-    }
-
-    private void processarViolacoes(List<ObjectError> erros) {
-        erros.forEach(erro -> {
-            if (erro instanceof FieldError erroField) {
-                String nomeCampo = erroField.getField();
-                String mensagemErro = erro.getDefaultMessage();
-                if (mensagemErro != null) {
-                    errors.add(Map.of(nomeCampo, mensagemErro));
-                }
-            }
-        });
-    }
-
-    private void processarViolacoes(Set<ConstraintViolation<?>> violacoes) {
-        this.errors.addAll(
-                violacoes.stream()
-                        .map(ConstraintViolation::getMessage)
-                        .map(mensagem -> Map.of("error", mensagem))
-                        .toList()
+    public static ExceptionResponse notFound(NotFoundException exception, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.NOT_FOUND.value(),
+                Evento.getFormattedTimestamp(),
+                "Recurso não encontrado",
+                exception.getMessage(),
+                request.getDescription(false),
+                new ArrayList<>()
         );
     }
 
-    public int getStatus() {
-        return status;
+    public static ExceptionResponse badRequest(MethodArgumentNotValidException exception, WebRequest request) {
+        List<Map<String, String>> validationErrors = processValidationErrors(
+                exception.getBindingResult().getAllErrors()
+        );
+        return new ExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                Evento.getFormattedTimestamp(),
+                INVALID_CALL_TITLE,
+                INVALID_DATA_MESSAGE,
+                request.getDescription(false),
+                validationErrors
+        );
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public static ExceptionResponse constraintViolation(ConstraintException exception, WebRequest request) {
+        List<Map<String, String>> validationErrors = processConstraintViolations(
+                exception.getViolations()
+        );
+        return new ExceptionResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                Evento.getFormattedTimestamp(),
+                INVALID_CALL_TITLE,
+                INVALID_DATA_MESSAGE,
+                request.getDescription(false),
+                validationErrors
+        );
     }
 
-    public String getTitulo() {
-        return titulo;
+    public static ExceptionResponse businessError(NegocioException exception, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                Evento.getFormattedTimestamp(),
+                "Negócio",
+                exception.getMessage(),
+                request.getDescription(false),
+                new ArrayList<>()
+        );
     }
 
-    public String getDescricao() {
-        return descricao;
+    public static ExceptionResponse internalError(InternalServerErrorException exception, WebRequest request) {
+        return new ExceptionResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                Evento.getFormattedTimestamp(),
+                "Error de aplicação",
+                exception.getMessage(),
+                request.getDescription(false),
+                new ArrayList<>()
+        );
     }
 
-    public String getPath() {
-        return path;
+    private static List<Map<String, String>> processValidationErrors(List<ObjectError> erros) {
+        return erros.stream()
+                .filter(erro -> erro instanceof FieldError)
+                .map(erro -> (FieldError) erro)
+                .filter(erro -> erro.getDefaultMessage() != null)
+                .map(erro -> Map.of(erro.getField(), erro.getDefaultMessage()))
+                .collect(Collectors.toList());
     }
 
-    public List<Map<String, String>> getErros() {
-        return errors;
+    private static List<Map<String, String>> processConstraintViolations(
+            Set<ConstraintViolation<?>> violacoes
+    ) {
+        return violacoes.stream()
+                .map(ConstraintViolation::getMessage)
+                .map(mensagem -> Map.of(ERROR_FIELD, mensagem))
+                .collect(Collectors.toList());
     }
-
-
 }

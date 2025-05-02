@@ -12,7 +12,9 @@ public class CepValidator implements ConstraintValidator<CepConstraint, String> 
 
     @Override
     public boolean isValid(String cep, ConstraintValidatorContext context) {
-        if (cep == null) return true;
+        if (cep == null) {
+            return true;
+        }
         return CEP_PATTERN.matcher(cep).matches();
     }
 }
