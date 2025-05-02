@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE module PUBLIC
         "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
         "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
     <property name="charset" value="UTF-8"/>
+    <!--<property name="severity" value="warning"/>-->
     <property name="fileExtensions" value="java, properties, xml"/>
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern"
+                  value="\&quot;.*\&quot;..|^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
     <module name="TreeWalker">
-        <module name="LineLength">
-            <property name="max" value="120"/>
-            <property name="ignorePattern"
-                      value="\&quot;.*\&quot;..|^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        </module>
+        <module name="OuterTypeFilename"/>
         <module name="IllegalTokenText">
             <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
             <property name="format"
@@ -33,7 +35,7 @@
         <module name="RightCurly">
             <property name="option" value="alone"/>
             <property name="tokens"
-                      value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT,  LITERAL_TRY, LITERAL_CATCH, LITERAL_ELSE"/>
+                      value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT"/>
         </module>
         <module name="OneStatementPerLine"/>
         <module name="MultipleVariableDeclarations"/>
@@ -42,20 +44,6 @@
         <module name="FallThrough"/>
         <module name="UpperEll"/>
         <module name="ModifierOrder"/>
-
-        <module name="WhitespaceAround"/>
-        <module name="WhitespaceAfter"/>
-        <module name="GenericWhitespace"/>
-
-        <module name="ImportOrder">
-            <property name="groups" value="java,javax,org,com"/>
-            <property name="ordered" value="true"/>
-            <property name="separated" value="true"/>
-            <property name="option" value="above"/>
-        </module>
-
-        <module name="UnusedImports"/>
-
         <module name="EmptyLineSeparator">
             <property name="allowNoEmptyLineBetweenFields" value="true"/>
         </module>
