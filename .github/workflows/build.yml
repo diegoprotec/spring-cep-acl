@@ -41,7 +41,6 @@ jobs:
       - name: Prepara artefato
         run: >
           rsync -av
-          --include='.ebextensions/'
           --include='.ebextensions/***'
           --include='build/***'
           --include='Dockerfile'
@@ -49,10 +48,10 @@ jobs:
           --exclude='*'
           ./ ${{ env.ARTIFACT_FILE }}/
 
-      - name: Verifica artefato
-        run: tree -L 1 ${{ env.ARTIFACT_FILE }}/
+      - name: Artefato
+        run: tree -L 1 -a ${{ env.ARTIFACT_FILE }}/
 
-      - name: Prepara artefato de deploy
+      - name: Comprensão do artefato
         run: |
           zip -rq ${{ env.ZIP_FILE }} ${{ env.ARTIFACT_FILE }}
 

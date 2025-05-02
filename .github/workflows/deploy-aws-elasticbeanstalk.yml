@@ -30,8 +30,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
-      - name: Verifica artefato baixado
-        run: tree ${{ env.ZIP_FILE }}
+      - name: Artefato
+        run: unzip -l ${{ env.ZIP_FILE }} | grep -E "^.*[[:space:]]+[^/]+/?$"
 
       - name: Configura credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
