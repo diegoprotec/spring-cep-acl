@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: sa-east-1
-  ARTIFACT_FILE: deploy.zip
+  ZIP_FILE: deploy.zip
   ARTIFACT_PATH: artifact/cep-acl/
   ARTIFACT_FULL_PATH: artifact/cep-acl/deploy.zip
   VERSION_LABEL: ${{ github.sha }}
@@ -29,6 +29,9 @@ jobs:
           name: deploy
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Verifica artefato baixado
+        run: tree ${{ env.ZIP_FILE }}
 
       - name: Configura credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4

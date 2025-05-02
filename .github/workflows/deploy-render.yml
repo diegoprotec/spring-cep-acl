@@ -24,7 +24,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Verifica artefato baixado
-        run: tree ${{ env.ZIP_FILE }}/
+        run: tree ${{ env.ZIP_FILE }}
 
       - name: Deployment status
         run: |
