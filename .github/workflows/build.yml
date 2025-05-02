@@ -41,8 +41,8 @@ jobs:
       - name: Prepara artefato
         run: >
           rsync -av
-          --include='.ebextensions/'
-          --include='build/'
+          --include='.ebextensions/***'
+          --include='build/***'
           --include='Dockerfile'
           --include='Procfile'
           --exclude='*'
