@@ -7,6 +7,9 @@ on:
     types:
       - completed
 
+env:
+  ZIP_FILE: deploy.zip
+
 jobs:
   deploy-render:
     runs-on: ubuntu-latest
@@ -19,7 +22,7 @@ jobs:
           name: deploy
 
       - name: Verifica artefato baixado
-        run: tree ${{ ARTIFACT_FILE }}/
+        run: tree ${{ env.ZIP_FILE }}/
 
       - name: Deployment status
         run: |
