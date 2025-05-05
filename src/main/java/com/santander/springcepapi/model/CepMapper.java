@@ -1,5 +1,7 @@
-package com.santander.springcepapi.boundary.cep.domain;
+package com.santander.springcepapi.model;
 
+import com.santander.springcepapi.model.entity.Cep;
+import com.santander.springcepapi.model.vo.CepVo;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

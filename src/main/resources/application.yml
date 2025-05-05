@@ -13,6 +13,7 @@ aws:
 
 api:
   viacep:
+    url: 'https://viacep.com.br/ws'
     timeout-seconds: 5
 
 springdoc:

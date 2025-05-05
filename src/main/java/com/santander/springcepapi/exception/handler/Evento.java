@@ -1,4 +1,4 @@
-package com.santander.springcepapi.exception;
+package com.santander.springcepapi.exception.handler;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

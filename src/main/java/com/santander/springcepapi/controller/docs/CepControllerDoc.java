@@ -1,6 +1,7 @@
-package com.santander.springcepapi.boundary.cep.rest.doc;
+package com.santander.springcepapi.controller.docs;
 
-import com.santander.springcepapi.boundary.cep.domain.CepVo;
+import com.santander.springcepapi.model.vo.CepVo;
+import com.santander.springcepapi.exception.constraint.cep.CepConstraint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,11 +9,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
 @Tag(name = "CEP", description = "API para gerenciamento de CEPs")
-public interface CepResourceDoc {
+public interface CepControllerDoc {
 
     @Operation(summary = "Buscar CEP específico",
             description = "Retorna os dados de endereço para o CEP informado")
@@ -24,7 +27,11 @@ public interface CepResourceDoc {
             @ApiResponse(responseCode = "400", description = "CEP inválido"),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
-    CepVo buscaCep(@Parameter(description = "CEP a ser pesquisado (formato: 00000-000 ou 00000000)") String cep);
+    CepVo buscaCep(@Parameter(description = "CEP a ser pesquisado (formato: 00000000)")
+                   @NotBlank(message = "O campo 'cep' é obrigatório.")
+                   @Size(min = 8, max = 8, message = "O CEP deve ter exatamente 8 caracteres.")
+                   @CepConstraint
+                   String cep);
 
     @Operation(summary = "Listar todos os CEPs",
             description = "Retorna uma lista com todos os CEPs cadastrados")

@@ -1,4 +1,4 @@
-package com.santander.springcepapi.boundary.cep.domain;
+package com.santander.springcepapi.model.entity;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;

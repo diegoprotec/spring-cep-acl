@@ -1,4 +1,4 @@
-package com.santander.springcepapi.config.async;
+package com.santander.springcepapi.service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

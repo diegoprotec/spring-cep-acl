@@ -1,6 +1,6 @@
-package com.santander.springcepapi.config.dynamodb;
+package com.santander.springcepapi.repository.config;
 
-import com.santander.springcepapi.boundary.cep.domain.Cep;
+import com.santander.springcepapi.model.entity.Cep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

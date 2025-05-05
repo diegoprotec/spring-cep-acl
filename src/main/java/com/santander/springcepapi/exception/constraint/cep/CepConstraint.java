@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CepConstraint {
-    String message() default "O 'cep' deve conter 8 dígitos";
+    String message() default "CEP a ser pesquisado (formato: 00000000)";
 
     Class<?>[] groups() default {};
 

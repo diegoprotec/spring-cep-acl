@@ -1,5 +1,6 @@
-package com.santander.springcepapi.config.webflux;
+package com.santander.springcepapi.client.config;
 
+import com.santander.springcepapi.client.CepClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,15 +16,17 @@ import java.time.Duration;
 
 @Configuration
 public class WebClientConfig {
-    private static final String VIA_CEP_BASE_URL = "https://viacep.com.br/ws/";
 
-    @Value("${api.viacep.timeout-seconds:5}")
+    @Value("${api.viacep.url}")
+    private String viaCepUrl;
+
+    @Value("${api.viacep.timeout-seconds}")
     private int timeoutSeconds;
 
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl(VIA_CEP_BASE_URL)
+                .baseUrl(viaCepUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .clientConnector(new ReactorClientHttpConnector(createHttpClient()))
                 .build();

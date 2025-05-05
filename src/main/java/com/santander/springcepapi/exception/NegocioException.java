@@ -1,4 +1,4 @@
-package com.santander.springcepapi.exception.negocio;
+package com.santander.springcepapi.exception;
 
 public class NegocioException extends RuntimeException {
 

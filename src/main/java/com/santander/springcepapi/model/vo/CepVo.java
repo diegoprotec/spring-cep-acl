@@ -1,4 +1,4 @@
-package com.santander.springcepapi.boundary.cep.domain;
+package com.santander.springcepapi.model.vo;
 
 import com.santander.springcepapi.exception.constraint.cep.CepConstraint;
 import jakarta.validation.constraints.NotBlank;
