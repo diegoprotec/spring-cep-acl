@@ -11,7 +11,6 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -36,14 +35,14 @@ public class CepRepository {
         cepTable.putItem(cep);
     }
 
-    public Optional<Cep> get(String cep) {
+    public Cep get(String cep) {
         LOG.info("Buscar cep: {}", cep);
         Key partitionKey = Key.builder().partitionValue(cep).build();
         GetItemEnhancedRequest request = GetItemEnhancedRequest.builder()
                 .key(partitionKey)
                 .consistentRead(true)
                 .build();
-        return Optional.of(cepTable.getItem(request));
+        return cepTable.getItem(request);
     }
 
 }

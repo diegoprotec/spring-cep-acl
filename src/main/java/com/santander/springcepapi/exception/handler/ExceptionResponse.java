@@ -14,6 +14,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public record ExceptionResponse(
@@ -86,12 +88,14 @@ public record ExceptionResponse(
         );
     }
 
-    public static ExceptionResponse internalError(InternalServerErrorException exception, WebRequest request) {
+    public static ExceptionResponse internalError(Exception exception, WebRequest request) {
+        var cause = getRootCause(exception);
+        var descricao = cause instanceof InternalServerErrorException ? cause.getMessage() : "";
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 Evento.getFormattedTimestamp(),
-                "Error de aplicação",
-                exception.getMessage(),
+                "Error interno da aplicação",
+                descricao,
                 request.getDescription(false),
                 new ArrayList<>()
         );
@@ -122,4 +126,17 @@ public record ExceptionResponse(
                 .map(mensagem -> Map.of(ERROR_FIELD, mensagem))
                 .collect(Collectors.toList());
     }
+
+    private static Throwable getRootCause(Throwable throwable) {
+        Set<Throwable> visited = new HashSet<>();
+        Throwable cause = throwable;
+
+        while (cause.getCause() != null && !visited.contains(cause.getCause())) {
+            visited.add(cause);
+            cause = cause.getCause();
+        }
+
+        return cause;
+    }
+
 }

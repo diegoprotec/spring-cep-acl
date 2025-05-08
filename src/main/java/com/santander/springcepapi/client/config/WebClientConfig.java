@@ -1,6 +1,7 @@
 package com.santander.springcepapi.client.config;
 
 import com.santander.springcepapi.client.CepClient;
+import com.santander.springcepapi.client.CepClientFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +25,12 @@ public class WebClientConfig {
     private int timeoutSeconds;
 
     @Bean
-    public WebClient webClient() {
+    public WebClient webClient(CepClientFilter filter) {
         return WebClient.builder()
                 .baseUrl(viaCepUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .clientConnector(new ReactorClientHttpConnector(createHttpClient()))
+                .filter(filter)
                 .build();
     }
 

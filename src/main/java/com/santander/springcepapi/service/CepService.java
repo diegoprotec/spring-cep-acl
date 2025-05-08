@@ -1,14 +1,11 @@
 package com.santander.springcepapi.service;
 
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.santander.springcepapi.client.CepClient;
-import com.santander.springcepapi.model.entity.Cep;
-import com.santander.springcepapi.model.CepMapper;
-import com.santander.springcepapi.model.vo.CepVo;
 import com.santander.springcepapi.exception.constraint.cep.CepConstraint;
+import com.santander.springcepapi.model.CepMapper;
+import com.santander.springcepapi.model.entity.Cep;
+import com.santander.springcepapi.model.vo.CepVo;
 import com.santander.springcepapi.repository.CepRepository;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +25,10 @@ import java.util.stream.Collectors;
 public class CepService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CepService.class);
-    private static final String ERRO_CEP_NAO_ENCONTRADO = "CEP não encontrado: ";
-    private static final String MENSAGEM_CONEXAO_VIACEP = "Conexão com a api ViaCep";
+    public static final String BUSCANDO_NO_BANCO = "Buscando CEP {} no banco de dados";
+    public static final String BUSCANDO_NA_API = "Buscando CEP {} na API externa";
+    public static final String ENCONTRADO_COM_SUCESSO = "CEP {} encontrado com sucesso";
+    public static final String NAO_ENCONTRADO = "CEP %s não encontrado";
 
     private final CepRepository cepRepository;
     private final CepClient cepClient;
@@ -49,40 +50,25 @@ public class CepService {
                 .collect(Collectors.toList());
     }
 
-    public void salvar(CepVo cep) {
-        cepRepository.add(CepMapper.INSTANCE.toDocument(cep));
-    }
-
-    public CepVo buscar(
-            @NotBlank(message = "O campo 'cep' é obrigatório.")
-            @Size(min = 8, max = 8, message = "O CEP deve ter exatamente 8 caracteres.")
-            @CepConstraint
-            String cep) {
-
-        return cepRepository.get(cep)
+    public Mono<CepVo> buscar(@CepConstraint String cep) {
+        return Mono.justOrEmpty(cepRepository.get(cep))
+                .doOnSubscribe(s -> LOG.info(BUSCANDO_NO_BANCO, cep))
                 .map(CepMapper.INSTANCE::toVo)
-                .orElseGet(() -> buscarViaApi(cep));
-    }
-
-    private CepVo buscarViaApi(String cep) {
-        LOG.info(MENSAGEM_CONEXAO_VIACEP);
-        try {
-            CepVo cepExterno = cepClient.buscaCep(cep);
-            salvarAsync(cepExterno);
-            return cepExterno;
-        } catch (WebClientResponseException.NotFound e) {
-            throw new NotFoundException(ERRO_CEP_NAO_ENCONTRADO + cep);
-        } catch (Exception ex) {
-            if (ex.getCause() instanceof ValueInstantiationException) {
-                throw new NotFoundException(ERRO_CEP_NAO_ENCONTRADO + cep);
-            }
-            throw ex;
-        }
+                .switchIfEmpty(
+                        cepClient.buscaCep(cep)
+                                .doOnSubscribe(s -> LOG.info(BUSCANDO_NA_API, cep))
+                                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
+                                        .onRetryExhaustedThrow((s1, s2) ->
+                                                new NotFoundException(String.format(NAO_ENCONTRADO, cep)))
+                                )
+                                .doOnNext(this::salvar)
+                )
+                .doOnNext(result -> LOG.info(ENCONTRADO_COM_SUCESSO, result.cep()));
     }
 
     @Async
-    protected void salvarAsync(CepVo cep) {
-        salvar(cep);
+    protected void salvar(CepVo cepVo) {
+        cepRepository.add(CepMapper.INSTANCE.toDocument(cepVo));
     }
 
 }
