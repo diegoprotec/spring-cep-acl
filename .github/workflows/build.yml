@@ -29,15 +29,8 @@ jobs:
       - name: Prepara Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Lint
-        run: ./gradlew checkstyleMain checkstyleTest
-        continue-on-error: true
-
-      - name: Build
+      - name: Build, lint, test
         run: ./gradlew build --no-daemon
-
-      - name: Testes/Cobertura
-        run: ./gradlew coverage --no-daemon
 
       - name: Prepara artefato
         run: >

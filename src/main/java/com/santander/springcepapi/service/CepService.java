@@ -75,12 +75,14 @@ public class CepService {
         return cepClient.buscaCep(cep)
                 .doOnSubscribe(_ -> LOG.info(BUSCANDO_NA_API, cep))
                 .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
-                        .onRetryExhaustedThrow((_, _) -> {
-                            var erro = new NotFoundException(String.format(NAO_ENCONTRADO, cep));
-                            this.evenSink.emitirEvento(new CepEvent.CepErroEvent(cep, erro.getMessage(), LocalDateTime.now()));
-                            return erro;
-                        }))
+                        .onRetryExhaustedThrow((_, _) -> emitCepNotFoundEvent(cep)))
                 .doOnNext(this::persistirCepAssincronamente);
+    }
+
+    private NotFoundException emitCepNotFoundEvent(String cep) {
+        var erro = new NotFoundException(String.format(NAO_ENCONTRADO, cep));
+        this.evenSink.emitirEvento(new CepEvent.CepErroEvent(cep, erro.getMessage(), LocalDateTime.now()));
+        return erro;
     }
 
     @Async("asyncExecutor")
@@ -109,9 +111,9 @@ public class CepService {
         this.evenSink.emitirEvento(new CepEvent.CepSalvoEvent(cepVo.cep(), cepVo, LocalDateTime.now()));
     }
 
-    private void notificarError(CepVo cepVo, Throwable e) {
-        LOG.error("Falha ao salvar CEP após tentativas", e);
-        this.evenSink.emitirEvento(new CepEvent.CepErroEvent(cepVo.cep(), e.getMessage(), LocalDateTime.now()));
+    private void notificarError(CepVo cepVo, Throwable error) {
+        LOG.error("Falha ao salvar CEP após tentativas", error);
+        this.evenSink.emitirEvento(new CepEvent.CepErroEvent(cepVo.cep(), error.getMessage(), LocalDateTime.now()));
     }
 
 }
