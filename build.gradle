@@ -1,6 +1,7 @@
 buildscript {
     ext {
         springBootVersion = '3.4.5'
+        graalvmBuildToolVersion = '0.10.3'
         springDependencyManagementVersion = '1.1.7'
         awsSdkVersion = '2.25.1'
         dynamodbVersion = '2.31.30'
@@ -19,6 +20,7 @@ buildscript {
 plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
+    id 'org.graalvm.buildtools.native' version "${graalvmBuildToolVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
     id 'checkstyle'
     id 'jacoco'
@@ -39,8 +41,11 @@ repositories {
 
 dependencies {
     // Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-docker-compose"
+
+    // Web-flux
     implementation 'org.springframework:spring-webflux'
 
     // AWS & DynamoDB
@@ -69,10 +74,23 @@ dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
 }
 
+bootBuildImage {
+    imageName = "contecin/${project.name}"
+    tags = ["latest", version]
+    builder = "paketobuildpacks/builder-jammy-base:latest"
+    environment = [
+            "BP_JVM_VERSION": "22"
+    ]
+}
+
 // Configuração do Checkstyle
 checkstyle {
     toolVersion = checkstyleVersion
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+}
+
+configurations {
+    nativeTest
 }
 
 // Configuração de Testes

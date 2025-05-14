@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  dynamodb-local:
+    container_name: dynamodb-local
+    image: "amazon/dynamodb-local:latest"
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4566/shell || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    environment:
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - AWS_DEFAULT_REGION=sa-east-1
+    ports:
+      - "4566:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - SERVER_PORT=8080
+      # Configurações do DynamoDB local
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - AWS_DEFAULT_REGION=us-east-1
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:4566
+    depends_on:
+      dynamodb-local:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
