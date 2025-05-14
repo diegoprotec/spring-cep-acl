@@ -16,6 +16,16 @@ import java.util.List;
 @Tag(name = "CEP", description = "API para gerenciamento de CEPs")
 public interface CepControllerDoc {
 
+    @Operation(summary = "Listar todos os CEPs",
+            description = "Retorna uma lista com todos os CEPs cadastrados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de CEPs recuperada com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CepVo.class))),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    List<CepVo> listaCeps();
+
     @Operation(summary = "Buscar CEP específico",
             description = "Retorna os dados de endereço para o CEP informado")
     @ApiResponses(value = {
@@ -27,15 +37,5 @@ public interface CepControllerDoc {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     Mono<CepVo> buscaCep(@Parameter(description = "CEP a ser pesquisado (formato: 00000000)") @CepConstraint String cep);
-
-    @Operation(summary = "Listar todos os CEPs",
-            description = "Retorna uma lista com todos os CEPs cadastrados")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de CEPs recuperada com sucesso",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CepVo.class))),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
-    List<CepVo> listaCeps();
 
 }

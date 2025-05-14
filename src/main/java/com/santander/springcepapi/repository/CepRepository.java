@@ -4,6 +4,8 @@ import com.santander.springcepapi.model.entity.Cep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -30,9 +32,11 @@ public class CepRepository {
         return cepTable.scan().items().stream().collect(Collectors.toList());
     }
 
-    public void add(Cep cep) {
+    public Mono<Cep> add(Cep cep) {
         LOG.info("Salvar cep: {}", cep.getCep());
-        cepTable.putItem(cep);
+        return Mono.fromRunnable(() -> cepTable.putItem(cep))
+                .subscribeOn(Schedulers.boundedElastic())
+                .thenReturn(cep);
     }
 
     public Cep get(String cep) {

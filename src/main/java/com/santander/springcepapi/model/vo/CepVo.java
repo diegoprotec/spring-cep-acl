@@ -23,7 +23,7 @@ public record CepVo(
             String localidade,
             String estado
     ) {
-        this(cep, logradouro, bairro, localidade, estado, CepUtil.getFormatado(cep));
+        this(CepUtil.getNormalizado(cep), logradouro, bairro, localidade, estado, CepUtil.getFormatado(cep));
     }
 
 }
