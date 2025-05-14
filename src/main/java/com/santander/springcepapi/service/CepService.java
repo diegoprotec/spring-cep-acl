@@ -6,8 +6,8 @@ import com.santander.springcepapi.model.CepMapper;
 import com.santander.springcepapi.model.entity.Cep;
 import com.santander.springcepapi.model.vo.CepVo;
 import com.santander.springcepapi.repository.CepRepository;
-import com.santander.springcepapi.service.event.subscriber.CepEvent;
 import com.santander.springcepapi.service.event.EvenSink;
+import com.santander.springcepapi.service.event.subscriber.CepEvent;
 import jakarta.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +113,5 @@ public class CepService {
         LOG.error("Falha ao salvar CEP após tentativas", e);
         this.evenSink.emitirEvento(new CepEvent.CepErroEvent(cepVo.cep(), e.getMessage(), LocalDateTime.now()));
     }
-
 
 }
