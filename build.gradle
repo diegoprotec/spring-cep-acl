@@ -1,26 +1,6 @@
-buildscript {
-    ext {
-        springBootVersion = '3.4.5'
-        graalvmBuildToolVersion = '0.10.3'
-        springDependencyManagementVersion = '1.1.7'
-        awsSdkVersion = '2.25.1'
-        dynamodbVersion = '2.31.30'
-        mapstructVersion = '1.6.3'
-        jerseyVersion = '3.1.10'
-        reactorNettyVersion = '1.3.0-M2'
-        checkstyleVersion = '10.12.4'
-        jacocoVersion = '0.8.13'
-        mockitoVersion = '5.2.0'
-        springDocVersion = '2.8.6'
-        jakartaWsVersion = '3.1.0'
-        finalJarName = 'spring-run.jar'
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
-    id 'org.graalvm.buildtools.native' version "${graalvmBuildToolVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
     id 'checkstyle'
     id 'jacoco'
@@ -40,83 +20,71 @@ repositories {
 }
 
 dependencies {
-    // Spring Boot
-    implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "org.springframework.boot:spring-boot-starter-validation"
-    implementation "org.springframework.boot:spring-boot-docker-compose"
-
-    // Web-flux
-    implementation 'org.springframework:spring-webflux'
-
-    // AWS & DynamoDB
     implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
-    implementation "software.amazon.awssdk:dynamodb:${dynamodbVersion}"
-    implementation "software.amazon.awssdk:dynamodb-enhanced:${dynamodbVersion}"
 
-    // Jakarta & Jersey
-    implementation "jakarta.ws.rs:jakarta.ws.rs-api:${jakartaWsVersion}"
-    implementation "org.glassfish.jersey.core:jersey-common:${jerseyVersion}"
+    // Spring Framework
+    implementation(
+            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-validation',
+            'org.springframework:spring-webflux'
+    )
 
-    // Documentação & Utilitários
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}"
-    implementation "io.projectreactor.netty:reactor-netty:${reactorNettyVersion}"
+    // AWS Dependencies
+    implementation(
+            'software.amazon.awssdk:dynamodb',
+            'software.amazon.awssdk:dynamodb-enhanced'
+    )
+
+    // Web Services & Documentation
+    implementation(
+            "jakarta.ws.rs:jakarta.ws.rs-api:${jakartaWsVersion}",
+            "org.glassfish.jersey.core:jersey-common:${jerseyVersion}",
+            "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}",
+            "io.projectreactor.netty:reactor-netty:${reactorNettyVersion}"
+    )
 
     // MapStruct
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-    // Testes
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'software.amazon.awssdk:apache-client'
-    testImplementation "org.mockito:mockito-inline:${mockitoVersion}"
+    // Testing
+    testImplementation(
+            'org.springframework.boot:spring-boot-starter-test',
+            'software.amazon.awssdk:apache-client',
+            "org.mockito:mockito-inline:${mockitoVersion}"
+    )
 
-    // Checkstyle
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
 }
 
-bootBuildImage {
-    imageName = "contecin/${project.name}"
-    tags = ["latest", version]
-    builder = "paketobuildpacks/builder-jammy-base:latest"
-    environment = [
-            "BP_JVM_VERSION": "22"
-    ]
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-Xlint:unchecked")
+    options.encoding = 'UTF-8'
+    options.release = 22
 }
 
-// Configuração do Checkstyle
 checkstyle {
     toolVersion = checkstyleVersion
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 
-configurations {
-    nativeTest
-}
-
-// Configuração de Testes
 test {
-    useJUnitPlatform()
-
     systemProperty 'spring.profiles.active', 'test'
+    useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
     }
     maxHeapSize = '1G'
-    jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}", '-Xshare:off'
+    jvmArgs = [
+            "-Xshare:off",
+            "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('byte-buddy-agent') }}"
+    ]
+
 }
 
-// Configuração do Jacoco
 jacoco {
     toolVersion = jacocoVersion
-}
-
-def excludedFiles = []
-
-tasks.register('coverage') {
-    group = 'qualidade'
-    description = 'Executa o test e cobertura do código'
-    dependsOn 'jacocoTestReport'
 }
 
 jacocoTestReport {
@@ -126,12 +94,6 @@ jacocoTestReport {
         csv.required = false
         html.required = true
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
-    }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: excludedFiles)
-        }))
     }
 }
 
@@ -144,7 +106,6 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.80
             }
-            excludes = []
         }
         rule {
             element = 'METHOD'
@@ -155,27 +116,17 @@ jacocoTestCoverageVerification {
             }
         }
     }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: excludedFiles)
-        }))
-    }
 }
 
-// Configurações de Compilação
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ["-Xlint:unchecked"]
-}
-
-// Tarefa de Verificação de Cobertura
 tasks.register('checkCoverage') {
+    description = 'Executa o test e verificação de cobertura do código'
+    group = 'verification'
+
     dependsOn test
     dependsOn jacocoTestReport
     dependsOn jacocoTestCoverageVerification
 }
 
-// Configuração do Jar
 bootJar {
     archiveFileName = finalJarName
 }

@@ -107,7 +107,7 @@ public class CepService {
     }
 
     private void notificarSucesso(CepVo cepVo) {
-        LOG.error("CEP '{}' salvo com sucesso", cepVo.cep());
+        LOG.info("CEP '{}' salvo com sucesso", cepVo.cep());
         this.evenSink.emitirEvento(new CepEvent.CepSalvoEvent(cepVo.cep(), cepVo, LocalDateTime.now()));
     }
 

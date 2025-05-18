@@ -3,11 +3,6 @@ spring:
     activate:
       on-profile: dev
 
-  docker:
-    compose:
-      lifecycle-management: start_only
-      file: docker-compose.yml
-
 aws:
   endpoint: '${DYNAMODB_ENDPOINT:http://localhost:4566}'
   accessKeyId: '${AWS_ACCESS_KEY_ID:dummy}'
