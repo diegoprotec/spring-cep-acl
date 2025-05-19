@@ -98,6 +98,55 @@ public class Cep {
                 + '}';
     }
 
+    public static CepBuilder builder() {
+        return new CepBuilder();
+    }
+
+    public static final class CepBuilder {
+        private final Cep cep;
+
+        private CepBuilder() {
+            this.cep = new Cep();
+        }
+
+        public CepBuilder cep(String cep) {
+            this.cep.setCep(cep);
+            return this;
+        }
+
+        public CepBuilder logradouro(String logradouro) {
+            this.cep.setLogradouro(logradouro);
+            return this;
+        }
+
+        public CepBuilder bairro(String bairro) {
+            this.cep.setBairro(bairro);
+            return this;
+        }
+
+        public CepBuilder localidade(String localidade) {
+            this.cep.setLocalidade(localidade);
+            return this;
+        }
+
+        public CepBuilder estado(String estado) {
+            this.cep.setEstado(estado);
+            return this;
+        }
+
+        public Cep build() {
+            validar();
+            return cep;
+        }
+
+        private void validar() {
+            if (cep.getCep() == null || cep.getCep().trim().isEmpty()) {
+                throw new IllegalStateException("CEP não pode ser nulo ou vazio");
+            }
+            // Adicione outras validações conforme necessário
+        }
+    }
+
 
 }
 

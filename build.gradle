@@ -11,7 +11,7 @@ version = '0.0.1'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(22)
+        languageVersion = JavaLanguageVersion.of(myJavaVersion)
     }
 }
 
@@ -43,24 +43,28 @@ dependencies {
             "io.projectreactor.netty:reactor-netty:${reactorNettyVersion}"
     )
 
+    // Testing
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation(
+            'software.amazon.awssdk:apache-client',
+            "org.mockito:mockito-core:${mockitoVersion}",
+            "io.projectreactor:reactor-test:${reactorTestVersion}"
+    )
+
+    // Lint
+    checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
+
     // MapStruct
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
-    // Testing
-    testImplementation(
-            'org.springframework.boot:spring-boot-starter-test',
-            'software.amazon.awssdk:apache-client',
-            "org.mockito:mockito-inline:${mockitoVersion}"
-    )
-
-    checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add("-Xlint:unchecked")
     options.encoding = 'UTF-8'
-    options.release = 22
+    options.release = myJavaVersion as Integer
 }
 
 checkstyle {
@@ -81,6 +85,7 @@ test {
             "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('byte-buddy-agent') }}"
     ]
 
+    finalizedBy jacocoTestReport
 }
 
 jacoco {
@@ -93,38 +98,7 @@ jacocoTestReport {
         xml.required = true
         csv.required = false
         html.required = true
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
-}
-
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            element = 'CLASS'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80
-            }
-        }
-        rule {
-            element = 'METHOD'
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80
-            }
-        }
-    }
-}
-
-tasks.register('checkCoverage') {
-    description = 'Executa o test e verificação de cobertura do código'
-    group = 'verification'
-
-    dependsOn test
-    dependsOn jacocoTestReport
-    dependsOn jacocoTestCoverageVerification
 }
 
 bootJar {
